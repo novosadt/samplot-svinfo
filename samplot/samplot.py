@@ -1737,6 +1737,8 @@ def plot_linked_reads(
     curr_max_insert_size,
     marker_size,
     jitter_bounds,
+    haplotype,
+    variant_info_file=None
 ):
     """Plots all LinkedReads for the region
     """
@@ -1754,6 +1756,9 @@ def plot_linked_reads(
             curr_min_insert_size = insert_size
         if not curr_max_insert_size or curr_max_insert_size < insert_size:
             curr_max_insert_size = insert_size
+
+        if variant_info_file != None:
+            store_sv_info(steps, variant_info_file, haplotype)
 
         for step in steps:
             p = [
@@ -1784,6 +1789,39 @@ def plot_linked_reads(
 
 
 # }}}
+
+# Store basic structural variant information into a file
+# {{{ def store_sv_info(steps, variant_info_file, haplotype)
+def store_sv_info(steps, f, hp):
+    f.write("event\tread_type\tsv_type\tsv_size\tcontig\tsv_start\tsv_end\thaplotype,\n")
+
+    for step in steps:
+        pair_steps = step.info["PAIR_STEPS"]
+        split_steps = step.info["SPLIT_STEPS"]
+        
+        for pair_step in pair_steps:
+            f.write("%s\tPAIRED,\t%s\t%d\t%s\t%d\t%d\t%s\n" % (
+                step.event, 
+                pair_step.info["TYPE"], 
+                pair_step.info["INSERTSIZE"], 
+                pair_step.start_pos.chrm, 
+                pair_step.start_pos.start, 
+                pair_step.end_pos.end, 
+                str(hp))
+            )
+
+        for pair_step in split_steps:
+            f.write("%s\tSPLIT\t%s\t%d\t%s\t%d\t%d\t%s\n" % (
+                step.event, 
+                pair_step.info["TYPE"], 
+                pair_step.info["INSERTSIZE"], 
+                pair_step.start_pos.chrm, 
+                pair_step.start_pos.start, 
+                pair_step.end_pos.end, 
+                str(hp))
+            )
+# }}}
+
 
 # {{{def plot_long_reads(long_reads,
 def plot_long_reads(long_reads, ax, ranges, curr_min_insert_size, curr_max_insert_size):
@@ -2350,6 +2388,13 @@ def add_plot(parent_parser):
         default=9999,
         help=SUPPRESS,
     )
+
+    parser.add_argument(
+        "--sv_file_name",
+        type=str, 
+        help="If specified, it prints basic structural variant information to the file.",
+        required=False,
+    )
     parser.set_defaults(func=plot)
 
 
@@ -2698,11 +2743,17 @@ def plot_samples(
     marker_size,
     coverage_only,
     jitter_bounds,
+    variant_info_file_name,
 ):
 
     """Plots all samples
     """
     max_insert_size = 0
+
+
+    variant_info_file = None
+    if variant_info_file_name != None:
+        variant_info_file = open(variant_info_file_name, "w")
 
     # If jitter > 0.08 is use we need to shift the ylim a bit to not hide any entires.
     ylim_margin = max(1.02 + jitter_bounds, 1.10)
@@ -2765,7 +2816,9 @@ def plot_samples(
                     curr_min_insert_size,
                     curr_max_insert_size,
                     marker_size,
-                    jitter_bounds
+                    jitter_bounds,
+                    hp,
+                    variant_info_file
                 )
             elif len(curr_long_reads) > 0:
                 curr_min_insert_size, curr_max_insert_size = plot_long_reads(
@@ -2890,6 +2943,10 @@ def plot_samples(
         # }}}
 
         ax_i += 1
+
+    if variant_info_file != None:
+        variant_info_file.close()
+
     return ax_i
 
 
