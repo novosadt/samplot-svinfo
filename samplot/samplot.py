@@ -5,6 +5,7 @@ import os
 import random
 import re
 import sys
+import argparse
 from argparse import SUPPRESS
 
 import matplotlib
@@ -20,7 +21,7 @@ import warnings
 warnings.filterwarnings('ignore', 'FixedFormatter should only be used together with FixedLocator')
 from matplotlib.offsetbox import AnchoredText
 
-
+__version__ = "1.3.0"
 
 INTERCHROM_YAXIS = 5000
 
@@ -3623,3 +3624,31 @@ def plot(parser, options, extra_args=None):
 
     plt.close(fig)
 # }}}
+
+def main(args=None):
+    if args is None:
+        args = sys.argv[1:]
+
+    parser = argparse.ArgumentParser(
+        prog="samplot", formatter_class=argparse.ArgumentDefaultsHelpFormatter
+    )
+    parser.add_argument(
+        "-v",
+        "--version",
+        help="Installed version",
+        action="version",
+        version="%(prog)s " + str(__version__),
+    )
+    sub = parser.add_subparsers(title="[sub-commands]", dest="command")
+    sub.required = True
+
+    add_plot(sub)
+    #add_vcf(sub)
+
+    args,extra_args = parser.parse_known_args(args)
+    args.func(parser, args, extra_args)
+
+
+if __name__ == "__main__":
+    sys.exit(main() or 0)
+
