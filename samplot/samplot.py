@@ -1794,8 +1794,6 @@ def plot_linked_reads(
 # Store basic structural variant information into a file
 # {{{ def store_sv_info(steps, variant_info_file, haplotype)
 def store_sv_info(steps, f, hp):
-    f.write("event\tread_type\tsv_type\tsv_size\tcontig\tsv_start\tsv_end\thaplotype,\n")
-
     for step in steps:
         pair_steps = step.info["PAIR_STEPS"]
         split_steps = step.info["SPLIT_STEPS"]
@@ -2755,6 +2753,7 @@ def plot_samples(
     variant_info_file = None
     if variant_info_file_name != None:
         variant_info_file = open(variant_info_file_name, "w")
+        variant_info_file.write("event\tread_type\tsv_type\tsv_size\tcontig\tsv_start\tsv_end\thaplotype,\n")
 
     # If jitter > 0.08 is use we need to shift the ylim a bit to not hide any entires.
     ylim_margin = max(1.02 + jitter_bounds, 1.10)
