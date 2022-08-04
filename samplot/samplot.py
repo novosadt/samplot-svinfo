@@ -3582,6 +3582,7 @@ def plot(parser, options, extra_args=None):
         marker_size,
         options.coverage_only,
         options.jitter,
+        options.sv_file_name,
     )
     # plot legend
     plot_legend(fig, options.legend_fontsize, marker_size)
