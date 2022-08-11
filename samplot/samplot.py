@@ -1799,24 +1799,26 @@ def store_sv_info(steps, f, hp):
         split_steps = step.info["SPLIT_STEPS"]
         
         for pair_step in pair_steps:
-            f.write("%s\tPAIRED,\t%s\t%d\t%s\t%d\t%d\t%s\n" % (
+            f.write("%s\tPAIRED,\t%s\t%d\t%s\t%d\t%s\t%d\t%s\n" % (
                 step.event, 
                 pair_step.info["TYPE"], 
                 pair_step.info["INSERTSIZE"], 
                 pair_step.start_pos.chrm, 
                 pair_step.start_pos.start, 
-                pair_step.end_pos.end, 
+                pair_step.end_pos.chrm,
+                pair_step.end_pos.end,
                 str(hp))
             )
 
         for pair_step in split_steps:
-            f.write("%s\tSPLIT\t%s\t%d\t%s\t%d\t%d\t%s\n" % (
+            f.write("%s\tSPLIT\t%s\t%d\t%s\t%d\t%s\t%d\t%s\n" % (
                 step.event, 
                 pair_step.info["TYPE"], 
                 pair_step.info["INSERTSIZE"], 
                 pair_step.start_pos.chrm, 
                 pair_step.start_pos.start, 
-                pair_step.end_pos.end, 
+                pair_step.end_pos.chrm,
+                pair_step.end_pos.end,
                 str(hp))
             )
 # }}}
@@ -2753,7 +2755,7 @@ def plot_samples(
     variant_info_file = None
     if variant_info_file_name != None:
         variant_info_file = open(variant_info_file_name, "w")
-        variant_info_file.write("event\tread_type\tsv_type\tsv_size\tcontig\tsv_start\tsv_end\thaplotype\n")
+        variant_info_file.write("event\tread_type\tsv_type\tsv_size\tcontig_start\tsv_start\tcontig_end\tsv_end\thaplotype\n")
 
     # If jitter > 0.08 is use we need to shift the ylim a bit to not hide any entires.
     ylim_margin = max(1.02 + jitter_bounds, 1.10)
@@ -3516,7 +3518,13 @@ def plot(parser, options, extra_args=None):
     marker_size = options.marker_size
 
     # set up sub plots
-    matplotlib.rcParams.update({"font.size": 12})
+    matplotlib.rcParams.update({
+        'font.size': 12,
+        'text.usetex': False,
+        'font.family': 'stixgeneral',
+        'mathtext.fontset': 'stix',
+    })
+
     fig = plt.figure(figsize=(plot_width, plot_height))
 
     # read alignment data
