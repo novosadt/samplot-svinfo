@@ -1795,30 +1795,30 @@ def plot_linked_reads(
 # {{{ def store_sv_info(steps, variant_info_file, haplotype)
 def store_sv_info(steps, f, hp):
     for step in steps:
-        pair_steps = step.info["PAIR_STEPS"]
-        split_steps = step.info["SPLIT_STEPS"]
-        
-        for pair_step in pair_steps:
+        if step.info is None:
+            continue
+
+        for pair_step in step.info["PAIR_STEPS"]:
             f.write("%s\tPAIRED,\t%s\t%d\t%s\t%d\t%s\t%d\t%s\n" % (
-                step.event, 
-                pair_step.info["TYPE"], 
-                pair_step.info["INSERTSIZE"], 
-                pair_step.start_pos.chrm, 
-                pair_step.start_pos.start, 
+                step.event,
+                pair_step.info["TYPE"],
+                pair_step.info["INSERTSIZE"],
+                pair_step.start_pos.chrm,
+                pair_step.start_pos.start,
                 pair_step.end_pos.chrm,
                 pair_step.end_pos.end,
                 str(hp))
             )
 
-        for pair_step in split_steps:
+        for split_step in step.info["SPLIT_STEPS"]:
             f.write("%s\tSPLIT\t%s\t%d\t%s\t%d\t%s\t%d\t%s\n" % (
-                step.event, 
-                pair_step.info["TYPE"], 
-                pair_step.info["INSERTSIZE"], 
-                pair_step.start_pos.chrm, 
-                pair_step.start_pos.start, 
-                pair_step.end_pos.chrm,
-                pair_step.end_pos.end,
+                step.event,
+                split_step.info["TYPE"],
+                split_step.info["INSERTSIZE"],
+                split_step.start_pos.chrm,
+                split_step.start_pos.start,
+                split_step.end_pos.chrm,
+                split_step.end_pos.end,
                 str(hp))
             )
 # }}}
